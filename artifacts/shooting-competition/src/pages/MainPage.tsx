@@ -3,7 +3,7 @@ import { useCompetitionData } from "../hooks/use-competition-data";
 import { Layout } from "../components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, MonitorPlay, Download, Upload, Printer, Edit2, Trash2, MoreHorizontal } from "lucide-react";
+import { Search, Plus, MonitorPlay, Download, Upload, Printer, Edit2, Trash2, MoreHorizontal, User, Users, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "../hooks/use-language";
 import { Competitor, Competition } from "../types";
 
+type ViewMode = "individuals" | "teams";
+
 export default function MainPage() {
   const { data, addCompetitor, updateCompetitor, deleteCompetitor, updateScore, addCompetition, updateCompetition, deleteCompetition, importData } = useCompetitionData();
   const { toast } = useToast();
@@ -21,6 +23,8 @@ export default function MainPage() {
 
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("individuals");
+  const [collapsedTeams, setCollapsedTeams] = useState<Set<string>>(new Set());
 
   const [compDialog, setCompDialog] = useState<{ open: boolean; competitor: Competitor | null }>({ open: false, competitor: null });
   const [colDialog, setColDialog] = useState<{ open: boolean; competition: Competition | null }>({ open: false, competition: null });
@@ -32,21 +36,18 @@ export default function MainPage() {
     const val = window.prompt(t.scorePrompt, currentScore?.toString() || "0");
     if (val !== null) {
       const parsed = parseFloat(val);
-      if (!isNaN(parsed)) {
-        updateScore(competitorId, compId, parsed);
-      }
+      if (!isNaN(parsed)) updateScore(competitorId, compId, parsed);
     }
   };
 
   const teams = useMemo(() => {
-    const t = new Set<string>();
-    data.competitors.forEach(c => {
-      if (c.teamName) t.add(c.teamName);
-    });
-    return Array.from(t).sort();
+    const s = new Set<string>();
+    data.competitors.forEach(c => { if (c.teamName) s.add(c.teamName); });
+    return Array.from(s).sort();
   }, [data.competitors]);
 
-  const competitorsWithTotal = useMemo(() => {
+  // Individuals: flat, filtered, sorted by total
+  const individualsRanked = useMemo(() => {
     let filtered = data.competitors;
     if (search) {
       const lower = search.toLowerCase();
@@ -55,12 +56,49 @@ export default function MainPage() {
     if (teamFilter !== "all") {
       filtered = filtered.filter(c => c.teamName === teamFilter);
     }
-
     return filtered.map(c => {
-      const total = Object.values(c.scores || {}).reduce((acc, score) => acc + (score || 0), 0);
+      const total = Object.values(c.scores || {}).reduce((acc, s) => acc + (s || 0), 0);
       return { ...c, total };
     }).sort((a, b) => b.total - a.total);
-  }, [data.competitors, search, teamFilter, data.competitions]);
+  }, [data.competitors, search, teamFilter]);
+
+  // Teams: grouped by team, sorted by team total; members sorted by individual total
+  const teamsRanked = useMemo(() => {
+    const groups = new Map<string, { key: string; name: string; members: (Competitor & { total: number })[]; teamTotal: number }>();
+
+    let filtered = data.competitors;
+    if (search) {
+      const lower = search.toLowerCase();
+      filtered = filtered.filter(c => c.name.toLowerCase().includes(lower) || c.teamName?.toLowerCase().includes(lower));
+    }
+
+    filtered.forEach(c => {
+      const total = Object.values(c.scores || {}).reduce((acc, s) => acc + (s || 0), 0);
+      const key = c.teamName || "";
+      if (!groups.has(key)) groups.set(key, { key, name: c.teamName || "", members: [], teamTotal: 0 });
+      groups.get(key)!.members.push({ ...c, total });
+    });
+
+    groups.forEach(g => {
+      g.members.sort((a, b) => b.total - a.total);
+      g.teamTotal = g.members.reduce((acc, m) => acc + m.total, 0);
+    });
+
+    return Array.from(groups.values()).sort((a, b) => {
+      if (!a.name && b.name) return 1;
+      if (a.name && !b.name) return -1;
+      return b.teamTotal - a.teamTotal;
+    });
+  }, [data.competitors, search]);
+
+  const toggleTeamCollapse = (key: string) => {
+    setCollapsedTeams(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   const handleExport = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -85,9 +123,7 @@ export default function MainPage() {
         if (json.competitions && json.competitors) {
           importData(json);
           toast({ title: t.importSuccess, description: t.importSuccessDesc });
-        } else {
-          throw new Error("Invalid format");
-        }
+        } else throw new Error("Invalid format");
       } catch {
         toast({ title: t.importFailed, description: t.importFailedDesc, variant: "destructive" });
       }
@@ -107,9 +143,12 @@ export default function MainPage() {
     setDeleteConfirm({ ...deleteConfirm, open: false });
   };
 
+  const scoreColumns = data.competitions;
+
   return (
     <Layout>
       <div className="container mx-auto p-4 py-8 space-y-6">
+        {/* Page header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold">{t.competitionManagement}</h1>
@@ -129,9 +168,31 @@ export default function MainPage() {
           </div>
         </div>
 
+        {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-card p-4 rounded-lg border">
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <div className="relative w-full sm:w-64">
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
+            {/* View mode toggle */}
+            <div className="flex rounded-md border overflow-hidden shrink-0">
+              <button
+                onClick={() => setViewMode("individuals")}
+                data-testid="btn-view-individuals"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "individuals" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+              >
+                <User className="w-3.5 h-3.5" />
+                {t.viewIndividuals}
+              </button>
+              <button
+                onClick={() => setViewMode("teams")}
+                data-testid="btn-view-teams"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors border-l ${viewMode === "teams" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                {t.viewTeams}
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="relative w-full sm:w-56">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t.searchPlaceholder}
@@ -141,20 +202,25 @@ export default function MainPage() {
                 data-testid="input-search"
               />
             </div>
-            <div className="w-full sm:w-48">
-              <Select value={teamFilter} onValueChange={setTeamFilter}>
-                <SelectTrigger data-testid="select-team-filter">
-                  <SelectValue placeholder={t.allTeams} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t.allTeams}</SelectItem>
-                  {teams.map(team => (
-                    <SelectItem key={team} value={team}>{team}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+            {/* Team filter (only in individuals view) */}
+            {viewMode === "individuals" && (
+              <div className="w-full sm:w-44">
+                <Select value={teamFilter} onValueChange={setTeamFilter}>
+                  <SelectTrigger data-testid="select-team-filter">
+                    <SelectValue placeholder={t.allTeams} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.allTeams}</SelectItem>
+                    {teams.map(team => (
+                      <SelectItem key={team} value={team}>{team}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
+
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImport} data-testid="input-file-import" />
             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} data-testid="btn-import">
@@ -169,79 +235,179 @@ export default function MainPage() {
           </div>
         </div>
 
+        {/* Table */}
         <div id="print-area" className="border rounded-lg overflow-x-auto custom-scrollbar bg-card shadow-sm">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs uppercase bg-muted text-muted-foreground sticky top-0 z-10 shadow-sm">
-              <tr>
-                <th className="px-4 py-3 font-semibold w-16">{t.rank}</th>
-                <th className="px-4 py-3 font-semibold">{t.competitor}</th>
-                <th className="px-4 py-3 font-semibold">{t.team}</th>
-                {data.competitions.map(comp => (
-                  <th key={comp.id} className="px-4 py-3 font-semibold text-center whitespace-nowrap group">
-                    <div className="flex items-center justify-center gap-2">
-                      {comp.name}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 no-print" data-testid={`btn-comp-menu-${comp.id}`}>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center">
-                          <DropdownMenuItem onClick={() => setColDialog({ open: true, competition: comp })}>
-                            <Edit2 className="h-4 w-4 mr-2" /> {t.editName}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm({ open: true, type: "competition", id: comp.id, name: comp.name })}>
-                            <Trash2 className="h-4 w-4 mr-2" /> {t.delete}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </th>
-                ))}
-                <th className="px-4 py-3 font-bold text-center">{t.total}</th>
-                <th className="px-4 py-3 w-16 text-right no-print">{t.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {competitorsWithTotal.map((competitor, idx) => (
-                <tr key={competitor.id} className="border-b hover:bg-muted/50 transition-colors group">
-                  <td className="px-4 py-3 font-mono font-medium">#{idx + 1}</td>
-                  <td className="px-4 py-3 font-medium whitespace-nowrap">{competitor.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{competitor.teamName || '-'}</td>
-                  {data.competitions.map(comp => (
-                    <td
-                      key={comp.id}
-                      className="px-4 py-3 text-center cursor-pointer hover:bg-primary/10 font-mono transition-colors border-l border-r border-transparent hover:border-border"
-                      onClick={() => handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
-                      data-testid={`score-${competitor.id}-${comp.id}`}
-                    >
-                      {competitor.scores[comp.id] ?? 0}
-                    </td>
-                  ))}
-                  <td className="px-4 py-3 text-center font-bold text-primary font-mono bg-primary/5">
-                    {competitor.total}
-                  </td>
-                  <td className="px-4 py-3 text-right no-print">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setCompDialog({ open: true, competitor })} data-testid={`btn-edit-${competitor.id}`}>
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteConfirm({ open: true, type: "competitor", id: competitor.id, name: competitor.name })} data-testid={`btn-delete-${competitor.id}`}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {competitorsWithTotal.length === 0 && (
+          {viewMode === "individuals" ? (
+            /* ── INDIVIDUALS TABLE ── */
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs uppercase bg-muted text-muted-foreground sticky top-0 z-10 shadow-sm">
                 <tr>
-                  <td colSpan={100} className="px-4 py-8 text-center text-muted-foreground">
-                    {t.noCompetitors}
-                  </td>
+                  <th className="px-4 py-3 font-semibold w-16">{t.rank}</th>
+                  <th className="px-4 py-3 font-semibold">{t.competitor}</th>
+                  <th className="px-4 py-3 font-semibold">{t.team}</th>
+                  {scoreColumns.map(comp => (
+                    <th key={comp.id} className="px-4 py-3 font-semibold text-center whitespace-nowrap group">
+                      <div className="flex items-center justify-center gap-2">
+                        {comp.name}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 no-print" data-testid={`btn-comp-menu-${comp.id}`}>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="center">
+                            <DropdownMenuItem onClick={() => setColDialog({ open: true, competition: comp })}>
+                              <Edit2 className="h-4 w-4 mr-2" /> {t.editName}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm({ open: true, type: "competition", id: comp.id, name: comp.name })}>
+                              <Trash2 className="h-4 w-4 mr-2" /> {t.delete}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </th>
+                  ))}
+                  <th className="px-4 py-3 font-bold text-center">{t.total}</th>
+                  <th className="px-4 py-3 w-16 text-right no-print">{t.actions}</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {individualsRanked.map((competitor, idx) => (
+                  <tr key={competitor.id} className="border-b hover:bg-muted/50 transition-colors group">
+                    <td className="px-4 py-3 font-mono font-medium">#{idx + 1}</td>
+                    <td className="px-4 py-3 font-medium whitespace-nowrap">{competitor.name}</td>
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{competitor.teamName || '-'}</td>
+                    {scoreColumns.map(comp => (
+                      <td
+                        key={comp.id}
+                        className="px-4 py-3 text-center cursor-pointer hover:bg-primary/10 font-mono transition-colors border-l border-r border-transparent hover:border-border"
+                        onClick={() => handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
+                        data-testid={`score-${competitor.id}-${comp.id}`}
+                      >
+                        {competitor.scores[comp.id] ?? 0}
+                      </td>
+                    ))}
+                    <td className="px-4 py-3 text-center font-bold text-primary font-mono bg-primary/5">
+                      {competitor.total}
+                    </td>
+                    <td className="px-4 py-3 text-right no-print">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setCompDialog({ open: true, competitor })} data-testid={`btn-edit-${competitor.id}`}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => setDeleteConfirm({ open: true, type: "competitor", id: competitor.id, name: competitor.name })} data-testid={`btn-delete-${competitor.id}`}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {individualsRanked.length === 0 && (
+                  <tr>
+                    <td colSpan={100} className="px-4 py-8 text-center text-muted-foreground">{t.noCompetitors}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            /* ── TEAMS TABLE ── */
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs uppercase bg-muted text-muted-foreground sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th className="px-4 py-3 font-semibold w-16">{t.rank}</th>
+                  <th className="px-4 py-3 font-semibold">{t.team} / {t.competitor}</th>
+                  {scoreColumns.map(comp => (
+                    <th key={comp.id} className="px-4 py-3 font-semibold text-center whitespace-nowrap">
+                      {comp.name}
+                    </th>
+                  ))}
+                  <th className="px-4 py-3 font-bold text-center">{t.total}</th>
+                  <th className="px-4 py-3 w-16 text-right no-print">{t.actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teamsRanked.map((group, groupIdx) => {
+                  const isCollapsed = collapsedTeams.has(group.key);
+                  return (
+                    <React.Fragment key={group.key}>
+                      {/* Team header row */}
+                      <tr
+                        className="border-b bg-muted/60 hover:bg-muted/80 cursor-pointer transition-colors"
+                        onClick={() => toggleTeamCollapse(group.key)}
+                        data-testid={`team-row-${group.key}`}
+                      >
+                        <td className="px-4 py-3 font-mono font-bold text-primary">
+                          {group.name ? `#${groupIdx + 1}` : "—"}
+                        </td>
+                        <td className="px-4 py-3" colSpan={1}>
+                          <div className="flex items-center gap-2 font-semibold">
+                            {isCollapsed
+                              ? <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            }
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span>{group.name || t.noTeam}</span>
+                            <span className="text-muted-foreground font-normal text-xs ml-1">({group.members.length} {t.members})</span>
+                          </div>
+                        </td>
+                        {/* Empty cells for each competition column */}
+                        {scoreColumns.map(comp => (
+                          <td key={comp.id} className="px-4 py-3 text-center text-muted-foreground text-xs">
+                            {group.members.reduce((acc, m) => acc + (m.scores[comp.id] || 0), 0)}
+                          </td>
+                        ))}
+                        <td className="px-4 py-3 text-center font-bold text-primary font-mono bg-primary/5">
+                          {group.teamTotal}
+                        </td>
+                        <td className="px-4 py-3"></td>
+                      </tr>
+
+                      {/* Member rows */}
+                      {!isCollapsed && group.members.map((competitor, memberIdx) => (
+                        <tr key={competitor.id} className="border-b hover:bg-muted/30 transition-colors group">
+                          <td className="px-4 py-2.5 text-muted-foreground font-mono text-xs pl-8">{memberIdx + 1}.</td>
+                          <td className="px-4 py-2.5 pl-10">
+                            <div className="flex items-center gap-2">
+                              <User className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+                              <span className="font-medium">{competitor.name}</span>
+                            </div>
+                          </td>
+                          {scoreColumns.map(comp => (
+                            <td
+                              key={comp.id}
+                              className="px-4 py-2.5 text-center cursor-pointer hover:bg-primary/10 font-mono transition-colors"
+                              onClick={() => handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
+                              data-testid={`score-${competitor.id}-${comp.id}`}
+                            >
+                              {competitor.scores[comp.id] ?? 0}
+                            </td>
+                          ))}
+                          <td className="px-4 py-2.5 text-center font-bold text-primary font-mono bg-primary/5">
+                            {competitor.total}
+                          </td>
+                          <td className="px-4 py-2.5 text-right no-print">
+                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => setCompDialog({ open: true, competitor })} data-testid={`btn-edit-${competitor.id}`}>
+                                <Edit2 className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ open: true, type: "competitor", id: competitor.id, name: competitor.name }); }} data-testid={`btn-delete-${competitor.id}`}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+                {teamsRanked.length === 0 && (
+                  <tr>
+                    <td colSpan={100} className="px-4 py-8 text-center text-muted-foreground">{t.noCompetitors}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 

@@ -23,6 +23,13 @@ export interface Translations {
   searchPlaceholder: string;
   allTeams: string;
 
+  // View mode toggle
+  viewIndividuals: string;
+  viewTeams: string;
+  noTeam: string;
+  teamTotal: string;
+  members: string;
+
   // Table headers
   rank: string;
   competitor: string;
@@ -102,6 +109,12 @@ const en: Translations = {
   searchPlaceholder: "Search competitors...",
   allTeams: "All Teams",
 
+  viewIndividuals: "Individuals",
+  viewTeams: "Teams",
+  noTeam: "No Team",
+  teamTotal: "Team Total",
+  members: "Members",
+
   rank: "Rank",
   competitor: "Competitor",
   team: "Team",
@@ -170,6 +183,12 @@ const cs: Translations = {
 
   searchPlaceholder: "Hledat závodníky...",
   allTeams: "Všechny týmy",
+
+  viewIndividuals: "Jednotlivci",
+  viewTeams: "Týmy",
+  noTeam: "Bez týmu",
+  teamTotal: "Celkem za tým",
+  members: "Členové",
 
   rank: "Pořadí",
   competitor: "Závodník",
