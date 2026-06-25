@@ -14,6 +14,94 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "../context/language-context";
 import { Competitor, Competition } from "../types";
 
+// Hidden area rendered only when printing
+function PrintArea() {
+  const { data } = useCompetitionData();
+  const { t } = useLanguage();
+
+  const individualRows = useMemo(() => {
+    return data.competitors.map(c => {
+      const total = Object.values(c.scores || {}).reduce((acc, s) => acc + (s || 0), 0);
+      return { ...c, total };
+    }).sort((a, b) => b.total - a.total);
+  }, [data.competitors, data.competitions]);
+
+  const teamRows = useMemo(() => {
+    const map = new Map<string, number>();
+    individualRows.forEach(c => {
+      if (c.teamName) {
+        map.set(c.teamName, (map.get(c.teamName) || 0) + c.total);
+      }
+    });
+    return Array.from(map.entries())
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [individualRows]);
+
+  const generatedDate = new Date().toLocaleDateString();
+
+  return (
+    <div id="print-only-area" style={{ display: "none" }}>
+      <h1>{t.appName}</h1>
+      <p className="print-meta">{generatedDate}</p>
+
+      {/* Individual results */}
+      <h2>{t.printIndividualResults}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th className="col-rank">#</th>
+            <th>{t.printColName}</th>
+            <th>{t.printColTeam}</th>
+            {data.competitions.map(comp => (
+              <th key={comp.id} className="num">{comp.name}</th>
+            ))}
+            <th className="num col-total">{t.printColTotal}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {individualRows.map((c, idx) => (
+            <tr key={c.id}>
+              <td className="col-rank">{idx + 1}</td>
+              <td className="name">{c.name}</td>
+              <td>{c.teamName || ''}</td>
+              {data.competitions.map(comp => (
+                <td key={comp.id} className="num">{c.scores[comp.id] ?? 0}</td>
+              ))}
+              <td className="num col-total">{c.total}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Team standings */}
+      {teamRows.length > 0 && (
+        <>
+          <h2 className="page-break-before">{t.printTeamStandings}</h2>
+          <table style={{ maxWidth: "360pt" }}>
+            <thead>
+              <tr>
+                <th className="col-rank">#</th>
+                <th>{t.printColTeam}</th>
+                <th className="num col-total">{t.printColTeamTotal}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teamRows.map((row, idx) => (
+                <tr key={row.name}>
+                  <td className="col-rank">{idx + 1}</td>
+                  <td className="name">{row.name}</td>
+                  <td className="num col-total">{row.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function MainPage() {
   const { data, addCompetitor, updateCompetitor, deleteCompetitor, updateScore, addCompetition, updateCompetition, deleteCompetition, importData } = useCompetitionData();
   const { toast } = useToast();
@@ -282,6 +370,8 @@ export default function MainPage() {
         title={deleteConfirm.type === "competitor" ? t.deleteCompetitorTitle : t.deleteCompetitionTitle}
         description={t.deleteDescription(deleteConfirm.name)}
       />
+
+      <PrintArea />
     </Layout>
   );
 }

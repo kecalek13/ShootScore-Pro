@@ -81,6 +81,14 @@ export interface Translations {
   autoScroll: string;
   linkCopied: string;
   linkCopiedDesc: string;
+
+  // Print / PDF
+  printIndividualResults: string;
+  printTeamStandings: string;
+  printColName: string;
+  printColTotal: string;
+  printColTeam: string;
+  printColTeamTotal: string;
 }
 
 const en: Translations = {
@@ -150,6 +158,13 @@ const en: Translations = {
   autoScroll: "Auto Scroll",
   linkCopied: "Link Copied",
   linkCopiedDesc: "Display URL copied to clipboard.",
+
+  printIndividualResults: "Individual Results",
+  printTeamStandings: "Team Standings",
+  printColName: "Name",
+  printColTotal: "Total",
+  printColTeam: "Team",
+  printColTeamTotal: "Team Total",
 };
 
 const cs: Translations = {
@@ -219,6 +234,13 @@ const cs: Translations = {
   autoScroll: "Auto-scroll",
   linkCopied: "Odkaz zkopírován",
   linkCopiedDesc: "URL pro zobrazení zkopírováno do schránky.",
+
+  printIndividualResults: "Výsledky jednotlivců",
+  printTeamStandings: "Výsledky družstev",
+  printColName: "Jméno",
+  printColTotal: "celkem",
+  printColTeam: "Družstvo",
+  printColTeamTotal: "celkem družstvo",
 };
 
 export const translations: Record<Language, Translations> = { en, cs };
