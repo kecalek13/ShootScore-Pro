@@ -420,7 +420,7 @@ export default function MainPage() {
             updateCompetitor(compDialog.competitor.id, compData);
             toast({ title: t.competitorUpdated });
           } else {
-            addCompetitor(compData);
+            addCompetitor({ ...compData, scores: {} });
             toast({ title: t.competitorAdded });
           }
         }}
