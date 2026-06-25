@@ -126,12 +126,21 @@
     margin: 1cm 1.2cm;
   }
 
-  body > * {
-    display: none !important;
+  /* Hide everything via visibility so nested descendants can opt back in */
+  body {
+    visibility: hidden;
   }
 
   #print-only-area {
-    display: block !important;
+    visibility: visible;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  #print-only-area * {
+    visibility: visible;
   }
 
   .no-print {
@@ -244,6 +253,15 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--foreground));
+}
+
+/* Hide scrollbar in display mode while keeping scroll functional */
+.display-scroll-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.display-scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .gold-rank {
