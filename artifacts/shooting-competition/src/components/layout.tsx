@@ -1,8 +1,7 @@
 import React from "react";
 import { useTheme } from "../hooks/use-theme";
 import { useLanguage } from "../hooks/use-language";
-import { useAuth } from "@workspace/replit-auth-web";
-import { Moon, Sun, Target, LogIn, LogOut, User } from "lucide-react";
+import { Moon, Sun, Target} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,7 +15,6 @@ import {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -24,7 +22,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Target className="w-6 h-6 text-primary" />
-            <span className="font-bold text-lg tracking-tight">{t.appName}</span>
+            <span className="font-bold text-lg tracking-tight">
+              {t.appName}
+            </span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -38,7 +38,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               {language === "en" ? "CZ" : "EN"}
             </Button>
-
             <Button
               variant="ghost"
               size="icon"
@@ -46,57 +45,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
               data-testid="btn-toggle-theme"
               title={t.toggleTheme}
             >
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </Button>
-
-            {/* Auth button */}
-            {!isLoading && (
-              isAuthenticated ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="gap-2" data-testid="btn-user-menu">
-                      {user?.profileImageUrl ? (
-                        <img src={user.profileImageUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
-                      ) : (
-                        <User className="w-4 h-4" />
-                      )}
-                      <span className="hidden sm:inline text-sm">
-                        {user?.firstName || user?.email || "Account"}
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col">
-                        {(user?.firstName || user?.lastName) && (
-                          <span className="font-semibold">{[user.firstName, user.lastName].filter(Boolean).join(" ")}</span>
-                        )}
-                        {user?.email && (
-                          <span className="text-xs text-muted-foreground truncate">{user.email}</span>
-                        )}
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} data-testid="btn-logout" className="text-destructive cursor-pointer">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              {theme === "light" ? (
+                <Moon className="w-5 h-5" />
               ) : (
-                <Button variant="outline" size="sm" onClick={login} className="gap-2" data-testid="btn-login">
-                  <LogIn className="w-4 h-4" />
-                  Log in
-                </Button>
-              )
-            )}
+                <Sun className="w-5 h-5" />
+              )}
+            </Button>
+            
           </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-x-hidden">
-        {children}
-      </main>
+      <main className="flex-1 overflow-x-hidden">{children}</main>
     </div>
   );
 }
