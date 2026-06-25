@@ -11,7 +11,7 @@ import { CompetitorDialog } from "../components/competitor-dialog";
 import { CompetitionDialog } from "../components/competition-dialog";
 import { DeleteConfirmDialog } from "../components/delete-confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "../context/language-context";
+import { useLanguage } from "../hooks/use-language";
 import { Competitor, Competition } from "../types";
 
 export default function MainPage() {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState } from "react";
 import { Language, Translations, translations } from "../lib/i18n";
 
 const STORAGE_KEY = "shooting-competition-language";
@@ -9,7 +9,7 @@ interface LanguageContextValue {
   t: Translations;
 }
 
-const LanguageContext = createContext<LanguageContextValue | null>(null);
+export const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
@@ -32,10 +32,4 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       {children}
     </LanguageContext.Provider>
   );
-}
-
-export function useLanguage() {
-  const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used inside LanguageProvider");
-  return ctx;
 }

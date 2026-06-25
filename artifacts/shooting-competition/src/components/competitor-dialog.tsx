@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Competitor } from "../types";
-import { useLanguage } from "../context/language-context";
+import { useLanguage } from "../hooks/use-language";
 
 export function CompetitorDialog({
   open,

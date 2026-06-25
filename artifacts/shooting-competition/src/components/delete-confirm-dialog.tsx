@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useLanguage } from "../context/language-context";
+import { useLanguage } from "../hooks/use-language";
 
 export function DeleteConfirmDialog({
   open,

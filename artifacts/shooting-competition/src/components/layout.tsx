@@ -1,6 +1,6 @@
 import React from "react";
 import { useTheme } from "../hooks/use-theme";
-import { useLanguage } from "../context/language-context";
+import { useLanguage } from "../hooks/use-language";
 import { Moon, Sun, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

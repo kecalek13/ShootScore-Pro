@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useCompetitionData } from "../hooks/use-competition-data";
-import { useLanguage } from "../context/language-context";
+import { useLanguage } from "../hooks/use-language";
 import { Maximize, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -25,15 +25,21 @@ export default function DisplayPage() {
     if (!autoScroll) return;
 
     let animationId: number;
-    let scrollPos = 0;
+    let lastTime: number | null = null;
 
-    const scroll = () => {
+    const scroll = (timestamp: number) => {
       if (containerRef.current) {
-        scrollPos += (scrollSpeed * 0.5);
-        if (scrollPos >= containerRef.current.scrollHeight - containerRef.current.clientHeight) {
-          scrollPos = 0;
+        if (lastTime !== null) {
+          const delta = timestamp - lastTime;
+          // scrollSpeed px per 16ms (roughly per-frame at 60fps)
+          containerRef.current.scrollTop += (scrollSpeed * delta) / 16;
+
+          const maxScroll = containerRef.current.scrollHeight - containerRef.current.clientHeight;
+          if (containerRef.current.scrollTop >= maxScroll) {
+            containerRef.current.scrollTop = 0;
+          }
         }
-        containerRef.current.scrollTop = scrollPos;
+        lastTime = timestamp;
       }
       animationId = requestAnimationFrame(scroll);
     };
@@ -85,7 +91,7 @@ export default function DisplayPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden relative pt-20" ref={containerRef}>
+      <div className="flex-1 overflow-y-auto relative pt-20" ref={containerRef}>
         <div className="container mx-auto px-8 pb-32">
           <div className="grid gap-4">
             <div className="grid grid-cols-12 gap-4 text-white/50 font-bold uppercase tracking-wider text-xl mb-4 px-6">
