@@ -11,15 +11,17 @@ import { CompetitorDialog } from "../components/competitor-dialog";
 import { CompetitionDialog } from "../components/competition-dialog";
 import { DeleteConfirmDialog } from "../components/delete-confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "../context/language-context";
 import { Competitor, Competition } from "../types";
 
 export default function MainPage() {
   const { data, addCompetitor, updateCompetitor, deleteCompetitor, updateScore, addCompetition, updateCompetition, deleteCompetition, importData } = useCompetitionData();
   const { toast } = useToast();
-  
+  const { t } = useLanguage();
+
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
-  
+
   const [compDialog, setCompDialog] = useState<{ open: boolean; competitor: Competitor | null }>({ open: false, competitor: null });
   const [colDialog, setColDialog] = useState<{ open: boolean; competition: Competition | null }>({ open: false, competition: null });
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; type: "competitor" | "competition"; id: string; name: string }>({ open: false, type: "competitor", id: "", name: "" });
@@ -27,7 +29,7 @@ export default function MainPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleScoreEdit = (competitorId: string, compId: string, currentScore: number) => {
-    const val = window.prompt("Enter new score:", currentScore?.toString() || "0");
+    const val = window.prompt(t.scorePrompt, currentScore?.toString() || "0");
     if (val !== null) {
       const parsed = parseFloat(val);
       if (!isNaN(parsed)) {
@@ -53,7 +55,7 @@ export default function MainPage() {
     if (teamFilter !== "all") {
       filtered = filtered.filter(c => c.teamName === teamFilter);
     }
-    
+
     return filtered.map(c => {
       const total = Object.values(c.scores || {}).reduce((acc, score) => acc + (score || 0), 0);
       return { ...c, total };
@@ -70,7 +72,7 @@ export default function MainPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast({ title: "Export Successful", description: "Data exported to JSON file." });
+    toast({ title: t.exportSuccess, description: t.exportSuccessDesc });
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,12 +84,12 @@ export default function MainPage() {
         const json = JSON.parse(event.target?.result as string);
         if (json.competitions && json.competitors) {
           importData(json);
-          toast({ title: "Import Successful", description: "Data imported successfully." });
+          toast({ title: t.importSuccess, description: t.importSuccessDesc });
         } else {
           throw new Error("Invalid format");
         }
-      } catch (err) {
-        toast({ title: "Import Failed", description: "The selected file is not a valid competition data file.", variant: "destructive" });
+      } catch {
+        toast({ title: t.importFailed, description: t.importFailedDesc, variant: "destructive" });
       }
     };
     reader.readAsText(file);
@@ -97,10 +99,10 @@ export default function MainPage() {
   const confirmDelete = () => {
     if (deleteConfirm.type === "competitor") {
       deleteCompetitor(deleteConfirm.id);
-      toast({ title: "Competitor Deleted" });
+      toast({ title: t.competitorDeleted });
     } else {
       deleteCompetition(deleteConfirm.id);
-      toast({ title: "Competition Deleted" });
+      toast({ title: t.competitionDeleted });
     }
     setDeleteConfirm({ ...deleteConfirm, open: false });
   };
@@ -110,19 +112,19 @@ export default function MainPage() {
       <div className="container mx-auto p-4 py-8 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Competition Management</h1>
-            <p className="text-muted-foreground mt-1">Manage competitors, scores, and exports.</p>
+            <h1 className="text-3xl font-bold">{t.competitionManagement}</h1>
+            <p className="text-muted-foreground mt-1">{t.manageSubtitle}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" onClick={() => setColDialog({ open: true, competition: null })} data-testid="btn-add-competition">
-              <Plus className="w-4 h-4 mr-2" /> Add Competition
+              <Plus className="w-4 h-4 mr-2" /> {t.addCompetition}
             </Button>
             <Button onClick={() => setCompDialog({ open: true, competitor: null })} data-testid="btn-add-competitor">
-              <Plus className="w-4 h-4 mr-2" /> Add Competitor
+              <Plus className="w-4 h-4 mr-2" /> {t.addCompetitor}
             </Button>
             <Link href="/display" target="_blank" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4 py-2 gap-2">
               <MonitorPlay className="w-4 h-4" />
-              Display Mode
+              {t.displayMode}
             </Link>
           </div>
         </div>
@@ -131,8 +133,8 @@ export default function MainPage() {
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search competitors..." 
+              <Input
+                placeholder={t.searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8"
@@ -142,28 +144,28 @@ export default function MainPage() {
             <div className="w-full sm:w-48">
               <Select value={teamFilter} onValueChange={setTeamFilter}>
                 <SelectTrigger data-testid="select-team-filter">
-                  <SelectValue placeholder="All Teams" />
+                  <SelectValue placeholder={t.allTeams} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Teams</SelectItem>
-                  {teams.map(t => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  <SelectItem value="all">{t.allTeams}</SelectItem>
+                  {teams.map(team => (
+                    <SelectItem key={team} value={team}>{team}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
-             <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImport} data-testid="input-file-import" />
-             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} data-testid="btn-import">
-               <Upload className="w-4 h-4 mr-2" /> Import
-             </Button>
-             <Button variant="outline" size="sm" onClick={handleExport} data-testid="btn-export">
-               <Download className="w-4 h-4 mr-2" /> Export
-             </Button>
-             <Button variant="outline" size="sm" onClick={() => window.print()} data-testid="btn-print">
-               <Printer className="w-4 h-4 mr-2" /> Print PDF
-             </Button>
+            <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImport} data-testid="input-file-import" />
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} data-testid="btn-import">
+              <Upload className="w-4 h-4 mr-2" /> {t.import}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} data-testid="btn-export">
+              <Download className="w-4 h-4 mr-2" /> {t.export}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()} data-testid="btn-print">
+              <Printer className="w-4 h-4 mr-2" /> {t.printPdf}
+            </Button>
           </div>
         </div>
 
@@ -171,9 +173,9 @@ export default function MainPage() {
           <table className="w-full text-sm text-left">
             <thead className="text-xs uppercase bg-muted text-muted-foreground sticky top-0 z-10 shadow-sm">
               <tr>
-                <th className="px-4 py-3 font-semibold w-16">Rank</th>
-                <th className="px-4 py-3 font-semibold">Competitor</th>
-                <th className="px-4 py-3 font-semibold">Team</th>
+                <th className="px-4 py-3 font-semibold w-16">{t.rank}</th>
+                <th className="px-4 py-3 font-semibold">{t.competitor}</th>
+                <th className="px-4 py-3 font-semibold">{t.team}</th>
                 {data.competitions.map(comp => (
                   <th key={comp.id} className="px-4 py-3 font-semibold text-center whitespace-nowrap group">
                     <div className="flex items-center justify-center gap-2">
@@ -186,18 +188,18 @@ export default function MainPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="center">
                           <DropdownMenuItem onClick={() => setColDialog({ open: true, competition: comp })}>
-                            <Edit2 className="h-4 w-4 mr-2" /> Edit Name
+                            <Edit2 className="h-4 w-4 mr-2" /> {t.editName}
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm({ open: true, type: "competition", id: comp.id, name: comp.name })}>
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete
+                            <Trash2 className="h-4 w-4 mr-2" /> {t.delete}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-3 font-bold text-center">Total</th>
-                <th className="px-4 py-3 w-16 text-right no-print">Actions</th>
+                <th className="px-4 py-3 font-bold text-center">{t.total}</th>
+                <th className="px-4 py-3 w-16 text-right no-print">{t.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -207,8 +209,8 @@ export default function MainPage() {
                   <td className="px-4 py-3 font-medium whitespace-nowrap">{competitor.name}</td>
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{competitor.teamName || '-'}</td>
                   {data.competitions.map(comp => (
-                    <td 
-                      key={comp.id} 
+                    <td
+                      key={comp.id}
                       className="px-4 py-3 text-center cursor-pointer hover:bg-primary/10 font-mono transition-colors border-l border-r border-transparent hover:border-border"
                       onClick={() => handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
                       data-testid={`score-${competitor.id}-${comp.id}`}
@@ -234,7 +236,7 @@ export default function MainPage() {
               {competitorsWithTotal.length === 0 && (
                 <tr>
                   <td colSpan={100} className="px-4 py-8 text-center text-muted-foreground">
-                    No competitors found.
+                    {t.noCompetitors}
                   </td>
                 </tr>
               )}
@@ -250,10 +252,10 @@ export default function MainPage() {
         onSave={(compData) => {
           if (compDialog.competitor) {
             updateCompetitor(compDialog.competitor.id, compData);
-            toast({ title: "Competitor Updated" });
+            toast({ title: t.competitorUpdated });
           } else {
             addCompetitor(compData);
-            toast({ title: "Competitor Added" });
+            toast({ title: t.competitorAdded });
           }
         }}
       />
@@ -265,10 +267,10 @@ export default function MainPage() {
         onSave={(name) => {
           if (colDialog.competition) {
             updateCompetition(colDialog.competition.id, name);
-            toast({ title: "Competition Updated" });
+            toast({ title: t.competitionUpdated });
           } else {
             addCompetition(name);
-            toast({ title: "Competition Added" });
+            toast({ title: t.competitionAdded });
           }
         }}
       />
@@ -277,8 +279,8 @@ export default function MainPage() {
         open={deleteConfirm.open}
         onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}
         onConfirm={confirmDelete}
-        title={deleteConfirm.type === "competitor" ? "Delete Competitor" : "Delete Competition"}
-        description={`Are you sure you want to delete ${deleteConfirm.name}? This action cannot be undone.`}
+        title={deleteConfirm.type === "competitor" ? t.deleteCompetitorTitle : t.deleteCompetitionTitle}
+        description={t.deleteDescription(deleteConfirm.name)}
       />
     </Layout>
   );

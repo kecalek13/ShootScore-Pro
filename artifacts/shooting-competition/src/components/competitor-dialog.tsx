@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Competitor } from "../types";
+import { useLanguage } from "../context/language-context";
 
 export function CompetitorDialog({
   open,
@@ -16,6 +17,7 @@ export function CompetitorDialog({
   onSave: (data: Omit<Competitor, "id" | "scores">) => void;
   competitor?: Competitor | null;
 }) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [teamName, setTeamName] = useState("");
 
@@ -30,21 +32,21 @@ export function CompetitorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{competitor ? "Edit Competitor" : "Add Competitor"}</DialogTitle>
+          <DialogTitle>{competitor ? t.editCompetitor : t.addCompetitorTitle}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t.name}</Label>
             <Input id="name" value={name} onChange={e => setName(e.target.value)} autoFocus data-testid="input-competitor-name" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="team">Team (Optional)</Label>
+            <Label htmlFor="team">{t.teamOptional}</Label>
             <Input id="team" value={teamName} onChange={e => setTeamName(e.target.value)} data-testid="input-competitor-team" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="btn-cancel-competitor">Cancel</Button>
-          <Button onClick={() => { onSave({ name, teamName }); onOpenChange(false); }} disabled={!name.trim()} data-testid="btn-save-competitor">Save</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="btn-cancel-competitor">{t.cancel}</Button>
+          <Button onClick={() => { onSave({ name, teamName }); onOpenChange(false); }} disabled={!name.trim()} data-testid="btn-save-competitor">{t.save}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
