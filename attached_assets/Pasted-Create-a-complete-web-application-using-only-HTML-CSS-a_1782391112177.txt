@@ -1,0 +1,59 @@
+Create a complete web application using only HTML, CSS and JavaScript (no backend required unless necessary). The application is intended for managing shooting competition results.
+
+Requirements:
+
+* Modern responsive design that works on desktop, tablet and mobile phones.
+* Ability to add, edit and delete competitors.
+* Each competitor has:
+
+  * Team name (optional)
+  * Competitor name
+  * Results for multiple competitions
+* The number of competitions must be configurable by the user. The user can dynamically add or remove competitions.
+* Each competition result is a numeric value.
+* The application automatically calculates:
+
+  * Total score for each competitor
+  * Ranking position based on total score
+  * Sorting from best to worst competitor
+* Ranking updates instantly whenever a score changes.
+* Support at least 100 competitors without performance issues.
+* Data must be stored locally in browser LocalStorage so page refresh does not lose data.
+* Import and export data as JSON.
+* Export final ranking and results as a professional PDF document.
+* Include print-friendly layout.
+
+Display Mode Requirements:
+
+* Add a special "Display Mode" button.
+* Display Mode opens a clean fullscreen ranking page designed for TVs, projectors and public displays.
+* Display Mode must be accessible from other devices using a generated share link.
+* Ranking view should automatically refresh when data changes.
+* Provide two display options:
+
+  * Manual scrolling
+  * Automatic scrolling (autoscroll)
+* Autoscroll speed must be adjustable.
+* Fullscreen mode support.
+* Large readable text suitable for viewing from a distance.
+* Show ranking position, competitor name, team name and total score.
+* Highlight top 3 competitors visually.
+
+Additional Features:
+
+* Search competitors.
+* Filter by team.
+* Dark mode and light mode.
+* Confirmation dialogs before deleting data.
+* Mobile-friendly touch controls.
+* Sticky table header.
+* Professional and clean UI.
+
+Code Requirements:
+
+* Use clean and well-structured HTML, CSS and JavaScript.
+* Separate files (index.html, style.css, script.js).
+* Add comments explaining important sections.
+* Generate fully working code ready to run immediately in Replit.
+* Include sample data for testing.
+* Create the entire application, not just a prototype.
