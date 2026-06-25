@@ -85,7 +85,7 @@ export default function DisplayPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-scroll relative pt-20 display-scroll-container" ref={containerRef}>
+      <div className="flex-1 overflow-hidden relative pt-20" ref={containerRef}>
         <div className="container mx-auto px-8 pb-32">
           <div className="grid gap-4">
             <div className="grid grid-cols-12 gap-4 text-white/50 font-bold uppercase tracking-wider text-xl mb-4 px-6">
