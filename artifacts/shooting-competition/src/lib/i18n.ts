@@ -1,172 +1,95 @@
-/**
- * i18n.ts
- * -------
- * Internationalisation (i18n) module for the app.
- *
- * Supported languages: English ("en") and Czech ("cs").
- * The active language is stored in localStorage and managed via
- * LanguageContext / useLanguage. Every UI string that the user sees
- * should come from the `t` object returned by `useLanguage()`.
- */
-
-/** Union of all supported language codes. */
 export type Language = "en" | "cs";
 
-/**
- * Full set of translated strings used throughout the UI.
- * Every key must have a value in BOTH "en" and "cs" objects below.
- */
 export interface Translations {
-  /** App name shown in the header. */
   appName: string;
 
-  // ── Header buttons ──────────────────────────────────────────────────
-  /** Tooltip for the light/dark mode toggle button. */
+  // Header
   toggleTheme: string;
-  /** Tooltip / label for the language-switch button. */
   toggleLanguage: string;
 
-  // ── Main page headings ───────────────────────────────────────────────
-  /** Page heading on the management screen. */
+  // Main page headings
   competitionManagement: string;
-  /** Subtitle / description below the main heading. */
   manageSubtitle: string;
 
-  // ── Main page action buttons ─────────────────────────────────────────
-  /** Label for the button that opens the "add competition" dialog. */
+  // Main page buttons
   addCompetition: string;
-  /** Label for the button that opens the "add competitor" dialog. */
   addCompetitor: string;
-  /** Label for the link that opens the fullscreen display page. */
   displayMode: string;
-  /** Label for the import-from-JSON button. */
   import: string;
-  /** Label for the export-to-JSON button. */
   export: string;
-  /** Label for the print/PDF button. */
   printPdf: string;
 
-  // ── Search and filter bar ────────────────────────────────────────────
-  /** Placeholder text inside the competitor search input. */
+  // Search / filter
   searchPlaceholder: string;
-  /** Default option in the team-filter dropdown ("show all teams"). */
   allTeams: string;
 
-  // ── View-mode toggle ─────────────────────────────────────────────────
-  /** Label for the "Individuals" view toggle button. */
+  // View mode toggle
   viewIndividuals: string;
-  /** Label for the "Teams" view toggle button. */
   viewTeams: string;
-  /** Label shown for competitors that have no team assigned. */
   noTeam: string;
-  /** Column header for the summed score of a whole team. */
   teamTotal: string;
-  /** Unit label showing how many members are in a team. */
   members: string;
 
-  // ── Table column headers ─────────────────────────────────────────────
-  /** "Rank" column header. */
+  // Table headers
   rank: string;
-  /** "Competitor name" column header. */
   competitor: string;
-  /** "Team" column header. */
   team: string;
-  /** "Total score" column header. */
   total: string;
-  /** "Actions" column header (edit/delete buttons). */
   actions: string;
 
-  // ── Per-column dropdown menu items ───────────────────────────────────
-  /** Menu item to rename a competition column. */
+  // Table column menu
   editName: string;
-  /** Menu item to delete a competition column or competitor row. */
   delete: string;
 
-  // ── Empty-state message ──────────────────────────────────────────────
-  /** Shown in the table body when no competitors match the current filters. */
+  // Empty state
   noCompetitors: string;
 
-  // ── Toast notification messages ──────────────────────────────────────
-  /** Toast title after a successful JSON export. */
+  // Toast messages
   exportSuccess: string;
-  /** Toast body after a successful JSON export. */
   exportSuccessDesc: string;
-  /** Toast title after a successful JSON import. */
   importSuccess: string;
-  /** Toast body after a successful JSON import. */
   importSuccessDesc: string;
-  /** Toast title after a failed JSON import. */
   importFailed: string;
-  /** Toast body after a failed JSON import. */
   importFailedDesc: string;
-  /** Toast title after a competitor is deleted. */
   competitorDeleted: string;
-  /** Toast title after a competition discipline is deleted. */
   competitionDeleted: string;
-  /** Toast title after a competitor's details are updated. */
   competitorUpdated: string;
-  /** Toast title after a new competitor is added. */
   competitorAdded: string;
-  /** Toast title after a competition discipline is renamed. */
   competitionUpdated: string;
-  /** Toast title after a new competition discipline is added. */
   competitionAdded: string;
 
-  // ── Delete confirmation dialog ───────────────────────────────────────
-  /** Title of the delete dialog when deleting a competitor. */
+  // Delete dialog (dynamic – use fn)
   deleteCompetitorTitle: string;
-  /** Title of the delete dialog when deleting a competition discipline. */
   deleteCompetitionTitle: string;
-  /**
-   * Body text of the delete confirmation dialog.
-   * @param name - The name of the item being deleted (used in the message).
-   */
   deleteDescription: (name: string) => string;
 
-  // ── Inline score editing ─────────────────────────────────────────────
-  /** Prompt text shown in the browser's native prompt() dialog when editing a score. */
+  // Inline score prompt
   scorePrompt: string;
 
-  // ── Competitor dialog ────────────────────────────────────────────────
-  /** Title of the dialog when editing an existing competitor. */
+  // Competitor dialog
   editCompetitor: string;
-  /** Title of the dialog when creating a new competitor. */
   addCompetitorTitle: string;
-  /** Label for the "Name" input field. */
   name: string;
-  /** Label for the optional "Team" input field. */
   teamOptional: string;
-  /** Label for the Cancel button in dialogs. */
   cancel: string;
-  /** Label for the Save button in dialogs. */
   save: string;
 
-  // ── Competition dialog ───────────────────────────────────────────────
-  /** Title of the dialog when editing an existing competition discipline. */
+  // Competition dialog
   editCompetition: string;
-  /** Title of the dialog when creating a new competition discipline. */
   addCompetitionTitle: string;
 
-  // ── Delete confirm button ────────────────────────────────────────────
-  /** Label for the destructive "confirm delete" button. */
+  // Delete confirm buttons
   confirmDelete: string;
 
-  // ── Display (live scoreboard) page ───────────────────────────────────
-  /** Large heading shown on the fullscreen display page. */
+  // Display page
   liveRanking: string;
-  /** Label for the auto-scroll speed slider. */
   speed: string;
-  /** Button label to stop automatic scrolling. */
   stopAuto: string;
-  /** Button label to start/resume automatic scrolling. */
   autoScroll: string;
-  /** Toast title after the display page URL is copied to clipboard. */
   linkCopied: string;
-  /** Toast body after the display page URL is copied to clipboard. */
   linkCopiedDesc: string;
 }
 
-/** ── English translations ─────────────────────────────────────────────── */
 const en: Translations = {
   appName: "ShootScore Pro",
 
@@ -242,7 +165,6 @@ const en: Translations = {
   linkCopiedDesc: "Display URL copied to clipboard.",
 };
 
-/** ── Czech translations ───────────────────────────────────────────────── */
 const cs: Translations = {
   appName: "ShootScore Pro",
 
@@ -318,10 +240,4 @@ const cs: Translations = {
   linkCopiedDesc: "URL pro zobrazení zkopírováno do schránky.",
 };
 
-/**
- * Lookup table that maps each supported language code to its translation object.
- * Used by LanguageContext to resolve `t` based on the currently active language.
- *
- * Usage: `translations["en"]` → English strings, `translations["cs"]` → Czech strings.
- */
 export const translations: Record<Language, Translations> = { en, cs };

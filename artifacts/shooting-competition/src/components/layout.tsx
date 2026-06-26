@@ -1,16 +1,8 @@
 import React from "react";
 import { useTheme } from "../hooks/use-theme";
 import { useLanguage } from "../hooks/use-language";
-import { Moon, Sun, Target} from "lucide-react";
+import { Moon, Sun, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
@@ -22,9 +14,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Target className="w-6 h-6 text-primary" />
-            <span className="font-bold text-lg tracking-tight">
-              {t.appName}
-            </span>
+            <span className="font-bold text-lg tracking-tight">{t.appName}</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -38,6 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               {language === "en" ? "CZ" : "EN"}
             </Button>
+
             <Button
               variant="ghost"
               size="icon"
@@ -45,18 +36,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
               data-testid="btn-toggle-theme"
               title={t.toggleTheme}
             >
-              {theme === "light" ? (
-                <Moon className="w-5 h-5" />
-              ) : (
-                <Sun className="w-5 h-5" />
-              )}
+              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
-            
           </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-x-hidden">{children}</main>
+      <main className="flex-1 overflow-x-hidden">
+        {children}
+      </main>
     </div>
   );
 }
