@@ -42,6 +42,7 @@ import { DeleteConfirmDialog } from "../components/delete-confirm-dialog";
 import { useToast }            from "@/hooks/use-toast";
 import { useLanguage }         from "../hooks/use-language";
 import { Competitor, Competition } from "../types";
+import { InputPromptWindow } from "@/components/ui/inputPromptWindow";
 
 // Whether the table shows a flat ranked list or grouped by team.
 type ViewMode = "individuals" | "teams";
@@ -262,6 +263,7 @@ export default function MainPage() {
   // =============================================================================
   return (
     <Layout>
+      <InputPromptWindow />
       <div className="container mx-auto p-4 py-8 space-y-6">
 
         {/* ── Page header ─────────────────────────────────────────────────── */}
