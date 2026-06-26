@@ -91,8 +91,8 @@ export default function MainPage() {
     compId:       string,
     currentScore: number,
   ) => {
-    const val = window.prompt(t.scorePrompt, currentScore?.toString() || "0");
-    if (val !== null) {
+    const val = window.prompt(t.scorePrompt, currentScore?.toString() || "0");  // Problém: na mobilu + v replit preview nevyskakuje.
+    if (val !== null) {                                                         // Nahradit za vlastní dialog.
       const parsed = parseFloat(val);
       if (!isNaN(parsed)) updateScore(competitorId, compId, parsed);
     }
@@ -461,7 +461,10 @@ export default function MainPage() {
                       <td
                         key={comp.id}
                         className="px-4 py-3 text-center cursor-pointer hover:bg-primary/10 font-mono transition-colors border-l border-r border-transparent hover:border-border"
-                        onClick={() => handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
+                        onClick={() => {
+                          console.log("Kliknutí")
+                          handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
+                        }
                         data-testid={`score-${competitor.id}-${comp.id}`}
                       >
                         {competitor.scores[comp.id] ?? 0}
