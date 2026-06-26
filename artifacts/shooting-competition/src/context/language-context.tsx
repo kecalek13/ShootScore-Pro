@@ -10,7 +10,7 @@
 // =============================================================================
 
 import React, { createContext, useState } from "react";
-import { Language, Translations, translations } from "../lib/i18n";
+import { Language, Translations, translations } from "@/lib/i18n";
 
 /** The LocalStorage key where the chosen language code is saved. */
 const STORAGE_KEY = "shooting-competition-language";

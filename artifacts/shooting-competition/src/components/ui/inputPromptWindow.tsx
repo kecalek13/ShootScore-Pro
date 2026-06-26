@@ -1,6 +1,9 @@
 import  * as React from "react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useLanguage } from "@/hooks/use-language"
+
+const { t } = useLanguage()
 
 const InputPromptWindow = () => {
   const [points, setPoints] = React.useState(0);
@@ -22,7 +25,7 @@ const InputPromptWindow = () => {
       <Button onClick={() => {
         console.log(points)
       }} >
-        Uložit
+        {t.save}
       </Button>
     </div>
   );

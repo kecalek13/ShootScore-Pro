@@ -12,7 +12,7 @@
 // =============================================================================
 
 import { useContext } from "react";
-import { LanguageContext } from "../context/language-context";
+import { LanguageContext } from "@/context/language-context";
 
 /**
  * Returns the current language, a setter to change it, and the "t" object
