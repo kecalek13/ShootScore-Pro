@@ -428,7 +428,7 @@ export default function MainPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 opacity-0 group-hover:opacity-100 no-print"
+                              className="h-6 w-6 md:opacity-0 md:group-hover:opacity-100 no-print"
                               data-testid={`btn-comp-menu-${comp.id}`}
                             >
                               <MoreHorizontal className="h-4 w-4" />
@@ -484,7 +484,7 @@ export default function MainPage() {
 
                     {/* Edit / delete buttons — fade in on row hover */}
                     <td className="px-4 py-3 text-right no-print">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="ghost" size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-foreground"
@@ -616,7 +616,7 @@ export default function MainPage() {
                           </td>
 
                           <td className="px-4 py-2.5 text-right no-print">
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                               <Button
                                 variant="ghost" size="icon"
                                 className="h-7 w-7 text-muted-foreground hover:text-foreground"

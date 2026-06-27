@@ -178,7 +178,7 @@ export default function DisplayPage() {
         Normally very faint (opacity-20) so it doesn't distract the audience.
         Becomes fully visible when the mouse moves over it.
       */}
-      <div className="absolute top-0 w-full p-4 flex justify-between opacity-20 hover:opacity-100 transition-opacity z-50 bg-gradient-to-b from-black/80 to-transparent">
+      <div className="absolute top-0 w-full p-4 flex justify-between opacity-100 md:opacity-20 md:hover:opacity-100 transition-opacity z-50 bg-gradient-to-b from-black/80 to-transparent">
 
         {/* Left side: title + Individuals / Teams toggle */}
         <div className="flex items-center gap-3">
