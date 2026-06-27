@@ -42,10 +42,7 @@ import { DeleteConfirmDialog } from "../components/delete-confirm-dialog";
 import { useToast }            from "@/hooks/use-toast";
 import { useLanguage }         from "../hooks/use-language";
 import { Competitor, Competition } from "../types";
-import {
-  InputPromptWindow,
-  InputPromptSetter
-} from "@/components/ui/inputPromptWindow";
+import { InputPromptWindow } from "@/components/ui/inputPromptWindow";
 
 // Whether the table shows a flat ranked list or grouped by team.
 type ViewMode = "individuals" | "teams";
