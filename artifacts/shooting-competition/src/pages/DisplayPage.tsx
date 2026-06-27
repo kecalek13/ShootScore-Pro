@@ -26,6 +26,10 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Competitor } from "../types";
 
+const fullscreenSupported =
+  document.fullscreenEnabled &&
+  typeof document.documentElement.requestFullscreen === "function";
+
 // Whether the page shows a flat ranked list or teams with members.
 type ViewMode = "individuals" | "teams";
 
@@ -115,7 +119,9 @@ export default function DisplayPage() {
           containerRef.current.scrollTop += (scrollSpeed * delta) / 16;
 
           // Wrap back to the top when we reach the bottom of the list.
-          if (containerRef.current.scrollTop >= maxScroll) {
+          containerRef.current.scrollTop += (scrollSpeed * delta) / 16;
+
+          if (containerRef.current.scrollTop + containerRef.current.clientHeight >= containerRef.current.scrollHeight) {
             containerRef.current.scrollTop = 0;
           }
         }
@@ -178,11 +184,11 @@ export default function DisplayPage() {
         Normally very faint (opacity-20) so it doesn't distract the audience.
         Becomes fully visible when the mouse moves over it.
       */}
-      <div className="absolute top-0 w-full p-4 flex justify-between opacity-100 md:opacity-20 md:hover:opacity-100 transition-opacity z-50 bg-gradient-to-b from-black/80 to-transparent">
+      <div className="absolute top-0 w-full p-4 flex flex-col md:flex-row justify-between opacity-100 md:opacity-20 md:hover:opacity-100 transition-opacity z-50 bg-gradient-to-b from-black/80 to-transparent">
 
         {/* Left side: title + Individuals / Teams toggle */}
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight text-white/90">
+          <h1 className="text-1xl sm:text-2xl font-bold tracking-tight text-white/90">
             {t.liveRanking}
           </h1>
 
@@ -242,13 +248,16 @@ export default function DisplayPage() {
             <Share2 className="w-5 h-5" />
           </Button>
 
-          <Button
-            variant="ghost" size="icon"
-            onClick={toggleFullscreen}
-            className="text-white hover:text-white hover:bg-white/20"
-          >
-            <Maximize className="w-5 h-5" />
-          </Button>
+          {fullscreenSupported && (
+            <Button
+              variant="ghost" size="icon"
+              onClick={toggleFullscreen}
+              className="text-white hover:text-white hover:bg-white/20"
+            >
+              <Maximize className="w-5 h-5" />
+            </Button>
+          )}
+          
         </div>
       </div>
 
@@ -257,7 +266,7 @@ export default function DisplayPage() {
         overflow-y-auto is essential — without it, scrollTop changes have no effect.
         pt-20 provides space below the overlay header.
       */}
-      <div className="flex-1 overflow-y-auto relative pt-20" ref={containerRef}>
+      <div className="flex-1 overflow-y-auto max-h-[95vh] relative pt-20" ref={containerRef}>
         <div className="container mx-auto px-8 pb-32">
 
           {viewMode === "individuals" ? (
@@ -280,15 +289,15 @@ export default function DisplayPage() {
                   className={`grid grid-cols-12 gap-4 items-center p-6 rounded-xl text-3xl font-medium transition-all ${cardClass(idx)}`}
                 >
                   {/* Rank number with medal colour */}
-                  <div className={`col-span-2 font-mono font-bold text-4xl ${medalTextClass(idx)}`}>
+                  <div className={`col-span-2 font-mono font-bold text-2xl sm:text-3xl lg:text-4xl ${medalTextClass(idx)}`}>
                     #{idx + 1}
                   </div>
-                  <div className="col-span-5 truncate">{competitor.name}</div>
-                  <div className="col-span-3 truncate text-white/50 text-2xl">
+                  <div className="col-span-5 truncate text-base sm:text-2xl lg:text-4xl">{competitor.name}</div>
+                  <div className="col-span-3 truncate text-white/50 text-base sm:text-xl lg:text-2xl">
                     {competitor.teamName || "-"}
                   </div>
                   {/* Total score with medal colour for top 3 */}
-                  <div className={`col-span-2 text-right font-mono font-bold text-5xl ${idx < 3 ? medalTextClass(idx) : "text-white"}`}>
+                  <div className={`col-span-2 text-right font-mono font-bold text-3xl lg:text-5xl ${idx < 3 ? medalTextClass(idx) : "text-white"}`}>
                     {competitor.total}
                   </div>
                 </div>
