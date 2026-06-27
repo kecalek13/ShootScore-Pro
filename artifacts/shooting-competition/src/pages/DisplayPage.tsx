@@ -113,16 +113,25 @@ export default function DisplayPage() {
     const scroll = (timestamp: number) => {
       if (containerRef.current) {
         if (lastTime !== null) {
-          const delta    = timestamp - lastTime;
-          const maxScroll = containerRef.current.scrollHeight - containerRef.current.clientHeight;
+          const delta     = timestamp - lastTime;
+          const el        = containerRef.current;
+          const maxScroll = el.scrollHeight - el.clientHeight;
+          const tolerance = 5;
 
-          containerRef.current.scrollTop += (scrollSpeed * delta) / 16;
+          el.scrollTop += (scrollSpeed * delta) / 16;
+
+          console.log({
+            scrollTop: el.scrollTop,
+            clientHeight: el.clientHeight,
+            scrollHeight: el.scrollHeight,
+            maxScroll: el.scrollHeight - el.clientHeight,
+          });
 
           // Wrap back to the top when we reach the bottom of the list.
-          containerRef.current.scrollTop += (scrollSpeed * delta) / 16;
+          el.scrollTop += (scrollSpeed * delta) / 16;
 
-          if (containerRef.current.scrollTop + containerRef.current.clientHeight >= containerRef.current.scrollHeight) {
-            containerRef.current.scrollTop = 0;
+          if (el.scrollTop + el.clientHeight >= el.scrollHeight - tolerance) {
+            el.scrollTop = 0;
           }
         }
         lastTime = timestamp;
