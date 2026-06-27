@@ -42,7 +42,10 @@ import { DeleteConfirmDialog } from "../components/delete-confirm-dialog";
 import { useToast }            from "@/hooks/use-toast";
 import { useLanguage }         from "../hooks/use-language";
 import { Competitor, Competition } from "../types";
-import { InputPromptWindow } from "@/components/ui/inputPromptWindow";
+import {
+  InputPromptWindow,
+  InputPromptSetter
+} from "@/components/ui/inputPromptWindow";
 
 // Whether the table shows a flat ranked list or grouped by team.
 type ViewMode = "individuals" | "teams";
@@ -87,16 +90,20 @@ export default function MainPage() {
    * Opens the browser's native prompt() dialog when the user clicks a score cell.
    * Simple and works without any extra UI components.
    */
-  const handleScoreEdit = (
+  const handleScoreEdit = async (
     competitorId: string,
-    compId:       string,
-    currentScore: number,
+    compId: string,
+    currentScore: number
   ) => {
-    const val = window.prompt(t.scorePrompt, currentScore?.toString() || "0");  // Problém: na mobilu + v replit preview nevyskakuje.
-    if (val !== null) {                                                         // Nahradit za vlastní dialog.
-      const parsed = parseFloat(val);
-      if (!isNaN(parsed)) updateScore(competitorId, compId, parsed);
-    }
+    const result = await (window as any).InputPromptSetter(
+      competitorId,
+      compId,
+      currentScore
+    );
+
+    if (result === null) return;
+
+    updateScore(competitorId, compId, result);
   };
 
   // ── Derived data: unique team names for the filter dropdown ────────────────
