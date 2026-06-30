@@ -586,6 +586,7 @@ export default function MainPage() {
                                 h-[1.2em]
                                 bg-yellow-300/70
                                 rounded-sm
+                                no-print
                               "
                             />
                             <span className="relative z-10 font-extrabold font-jetbrains text-lg">
