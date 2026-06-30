@@ -288,18 +288,18 @@ export default function DisplayPage() {
               {individualsRanking.map((competitor, idx) => (
                 <div
                   key={competitor.id}
-                  className={`grid grid-cols-12 gap-4 items-center p-6 rounded-xl text-3xl font-medium transition-all ${cardClass(idx)}`}
+                  className={`grid grid-cols-12 gap-4 items-center p-3 rounded-xl text-3xl font-medium transition-all ${cardClass(idx)}`}
                 >
                   {/* Rank number with medal colour */}
-                  <div className={`col-span-2 font-mono font-bold text-2xl sm:text-3xl lg:text-4xl ${medalTextClass(idx)}`}>
+                  <div className={`col-span-2 font-mono font-bold text-xl sm:text-2xl lg:text-4xl ${medalTextClass(idx)}`}>
                     #{idx + 1}
                   </div>
-                  <div className="col-span-5 truncate text-base sm:text-2xl lg:text-4xl">{competitor.name}</div>
+                  <div className="col-span-5 truncate text-base sm:text-1xl lg:text-3xl">{competitor.name}</div>
                   <div className="col-span-3 truncate text-white/50 text-base sm:text-xl lg:text-2xl">
                     {competitor.teamName || "-"}
                   </div>
                   {/* Total score with medal colour for top 3 */}
-                  <div className={`col-span-2 text-right font-mono font-bold text-3xl lg:text-5xl ${idx < 3 ? medalTextClass(idx) : "text-white"}`}>
+                  <div className={`col-span-2 text-right font-mono font-bold text-xl lg:text-3xl ${idx < 3 ? medalTextClass(idx) : "text-white"}`}>
                     {competitor.total}
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export default function DisplayPage() {
             // ── TEAMS DISPLAY ────────────────────────────────────────────────
             // Grouped view: each team gets a header card with medal treatment,
             // and individual members are listed beneath it at a smaller scale.
-            <div className="grid gap-6">
+            <div className="grid gap-3">
 
               {/* Column labels */}
               <div className="grid grid-cols-12 gap-4 text-white/50 font-bold uppercase tracking-wider text-xl mb-4 px-6">
@@ -331,14 +331,14 @@ export default function DisplayPage() {
                   }`}
                 >
                   {/* Team header row */}
-                  <div className={`grid grid-cols-12 gap-4 items-center px-6 py-5 ${
+                  <div className={`grid grid-cols-12 gap-4 items-center px-4 py-1 ${
                     groupIdx === 0 ? "bg-gradient-to-r from-yellow-500/25 to-black/60" :
                     groupIdx === 1 ? "bg-gradient-to-r from-slate-400/20  to-black/60" :
                     groupIdx === 2 ? "bg-gradient-to-r from-amber-700/20  to-black/60" :
                                     "bg-white/8"
                   }`}>
                     {/* Team rank (—  for the unnamed group) */}
-                    <div className={`col-span-2 font-mono font-bold text-4xl ${group.name ? medalTextClass(groupIdx) : "text-white/20"}`}>
+                    <div className={`col-span-2 font-mono font-bold text-base sm:text-1xl lg:text-2xl ${group.name ? medalTextClass(groupIdx) : "text-white/20"}`}>
                       {group.name ? `#${groupIdx + 1}` : "—"}
                     </div>
 
@@ -352,7 +352,7 @@ export default function DisplayPage() {
                     </div>
 
                     {/* Team total with medal colour */}
-                    <div className={`col-span-3 text-right font-mono font-bold text-5xl ${groupIdx < 3 && group.name ? medalTextClass(groupIdx) : "text-white"}`}>
+                    <div className={`col-span-3 text-right font-mono font-bold text-xl lg:text-3xl ${groupIdx < 3 && group.name ? medalTextClass(groupIdx) : "text-white"}`}>
                       {group.teamTotal}
                     </div>
                   </div>
@@ -362,16 +362,16 @@ export default function DisplayPage() {
                     {group.members.map((competitor, memberIdx) => (
                       <div
                         key={competitor.id}
-                        className="grid grid-cols-12 gap-4 items-center px-6 py-4 text-2xl"
+                        className="grid grid-cols-12 gap-4 items-center px-4 py-1 text-2xl"
                       >
                         {/* Position within team (not overall rank) */}
                         <div className="col-span-2 font-mono text-white/30 text-xl pl-6">
                           {memberIdx + 1}.
                         </div>
-                        <div className="col-span-7 truncate text-white/80 pl-2">
+                        <div className="col-span-7 truncate text-white/80 pl-5 text-base">
                           {competitor.name}
                         </div>
-                        <div className="col-span-3 text-right font-mono font-semibold text-white/90">
+                        <div className="col-span-3 text-right text-lg font-mono font-medium text-white/90">
                           {competitor.total}
                         </div>
                       </div>
