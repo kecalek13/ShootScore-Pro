@@ -468,7 +468,6 @@ export default function MainPage() {
                         key={comp.id}
                         className="px-4 py-3 text-center cursor-pointer hover:bg-primary/10 font-mono transition-colors border-l border-r border-transparent hover:border-border"
                         onClick={() => {
-                          console.log("Kliknutí")
                           handleScoreEdit(competitor.id, comp.id, competitor.scores[comp.id])}
                         }
                         data-testid={`score-${competitor.id}-${comp.id}`}
@@ -546,7 +545,7 @@ export default function MainPage() {
 
                       {/* Team header row — click to collapse/expand members */}
                       <tr
-                        className="border-b bg-muted/60 hover:bg-muted/80 cursor-pointer transition-colors"
+                        className="border-x-2 border-t-2 border-black bg-muted/60 hover:bg-muted/80 cursor-pointer transition-colors"
                         onClick={() => toggleTeamCollapse(group.key)}
                         data-testid={`team-row-${group.key}`}
                       >
@@ -577,7 +576,20 @@ export default function MainPage() {
 
                         {/* Combined team total */}
                         <td className="px-4 py-3 text-center font-bold text-primary font-mono bg-primary/5">
-                          {group.teamTotal}
+                          <span className="relative inline-block px-1">
+                            <span className="
+                              [print-color-adjust:exact]
+                              [-webkit-print-color-adjust:exact]
+                              absolute
+                              left-0
+                              right-0
+                              bottom-[0.1em]
+                              h-[1.2em]
+                              bg-yellow-300/70
+                              rounded-sm"
+                            ></span>
+                            <span className="relative z-10">{group.teamTotal}</span>
+                          </span>
                         </td>
                         <td className="px-4 py-3" />
                       </tr>
@@ -586,7 +598,7 @@ export default function MainPage() {
                       {!isCollapsed && group.members.map((competitor, memberIdx) => (
                         <tr
                           key={competitor.id}
-                          className="border-b hover:bg-muted/30 transition-colors group"
+                          className="border-x-2 border-black hover:bg-muted/30 transition-colors group"
                         >
                           {/* Rank within the team (not overall rank) */}
                           <td className="px-4 py-2.5 text-muted-foreground font-mono text-xs pl-8">

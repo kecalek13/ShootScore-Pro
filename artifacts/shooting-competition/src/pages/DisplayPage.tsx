@@ -54,7 +54,7 @@ export default function DisplayPage() {
 
   // ── UI state ───────────────────────────────────────────────────────────────
   const [autoScroll,  setAutoScroll]  = useState(true);   // Autoscroll on by default
-  const [scrollSpeed, setScrollSpeed] = useState(2);       // Pixels per 16 ms (roughly)
+  const [scrollSpeed, setScrollSpeed] = useState(1);       // Pixels per 16 ms (roughly)
   const [viewMode,    setViewMode]    = useState<ViewMode>("individuals");
 
   // Ref to the scrollable container element so we can control scrollTop.
@@ -119,13 +119,6 @@ export default function DisplayPage() {
           const tolerance = 5;
 
           el.scrollTop += (scrollSpeed * delta) / 16;
-
-          console.log({
-            scrollTop: el.scrollTop,
-            clientHeight: el.clientHeight,
-            scrollHeight: el.scrollHeight,
-            maxScroll: el.scrollHeight - el.clientHeight,
-          });
 
           // Wrap back to the top when we reach the bottom of the list.
           el.scrollTop += (scrollSpeed * delta) / 16;
@@ -236,7 +229,7 @@ export default function DisplayPage() {
             <span className="text-xs text-white/70 uppercase">{t.speed}</span>
             <Slider
               value={[scrollSpeed]}
-              min={0.5} max={5} step={0.5}
+              min={0.4} max={2} step={0.1}
               onValueChange={v => setScrollSpeed(v[0])}
             />
           </div>
