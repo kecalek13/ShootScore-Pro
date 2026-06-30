@@ -575,23 +575,24 @@ export default function MainPage() {
                         ))}
 
                         {/* Combined team total */}
-                        <td className="px-4 py-3 text-center font-bold text-primary font-mono bg-primary/5">
+                        <td className="px-4 py-3 text-center text-primary font-jetbrains bg-primary/5 text-lg">
                           <span className="relative inline-block px-1">
-                            <span className="
-                              [print-color-adjust:exact]
-                              [-webkit-print-color-adjust:exact]
-                              absolute
-                              left-0
-                              right-0
-                              bottom-[0.1em]
-                              h-[1.2em]
-                              bg-yellow-300/70
-                              rounded-sm"
-                            ></span>
-                            <span className="relative z-10">{group.teamTotal}</span>
+                            <span
+                              className="
+                                absolute
+                                left-0
+                                right-0
+                                bottom-[0.1em]
+                                h-[1.2em]
+                                bg-yellow-300/70
+                                rounded-sm
+                              "
+                            />
+                            <span className="relative z-10 font-extrabold font-jetbrains text-lg">
+                              {group.teamTotal}
+                            </span>
                           </span>
                         </td>
-                        <td className="px-4 py-3" />
                       </tr>
 
                       {/* Member rows — only rendered when the team is not collapsed */}
